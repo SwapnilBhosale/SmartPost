@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_vertical">
+
+    <Button
+        android:id="@+id/showConsignments"
+        style="@style/ButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/endJourney"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="100dp"
+        android:padding="3dp"
+        android:text="Show Consignments"
+        android:layout_alignRight="@+id/endJourney" />
+
+    <Button
+        android:id="@+id/endJourney"
+        style="@style/ButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/showConsignments"
+        android:layout_margin="10dp"
+        android:padding="3dp"
+        android:text="End Journey" />
+
+    <Button
+        android:id="@+id/scanQR"
+        style="@style/ButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/endJourney"
+        android:layout_margin="10dp"
+        android:padding="3dp"
+        android:text="Scan QR" />
+
+   <!-- <include
+        layout="@layout/footer_healthcaredemo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />-->
+
+</RelativeLayout>
+

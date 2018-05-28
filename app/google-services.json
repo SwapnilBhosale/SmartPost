@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "611988176702",
+    "firebase_url": "https://smartpost-b7846.firebaseio.com",
+    "project_id": "smartpost-b7846",
+    "storage_bucket": "smartpost-b7846.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:611988176702:android:008628e7666f2006",
+        "android_client_info": {
+          "package_name": "com.smartpost"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "611988176702-p4pc6nrq4aq33vjho6vkh32slcm8brju.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "611988176702-p4pc6nrq4aq33vjho6vkh32slcm8brju.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKo3Tt0IWbwx9-0kn96H7GqkHdEJaxJUQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
