@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +31,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.smartpost.Entity.PostManClientMap;
+import com.smartpost.LoginActivity;
 import com.smartpost.R;
 import com.smartpost.core.ApplicationSetting;
 import com.smartpost.utils.Constants;
@@ -205,14 +208,33 @@ public class ClientActivity extends AppCompatActivity {
 
                 String uuId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-                DatabaseReference databaseReference =  FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POSTMAN_KEY).child(uuId);
-
-                // push hospital extension
-                databaseReference.child(Constants.FIREBASE_TOKEN).setValue("");
+                DatabaseReference databaseReference =  FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_CLIENT_KEY).child(uuId);
+                databaseReference.getRef().removeValue(new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                        pd.dismiss();
+                        openLoginActivity();
+                    }
+                });
                 break;
         }
         super.onOptionsItemSelected(item);
         return true;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return true;
+    }
+
+
+    private void openLoginActivity(){
+        Intent intent = new Intent(this,LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
     }
 
     private  void deleteFirebaseData(){

@@ -63,4 +63,8 @@ public class PostManClientMap {
                 ", consignmentId='" + consignmentId + '\'' +
                 '}';
     }
+
+    public boolean isBelongToPostman(String uuid){
+        return  this.uuid.equalsIgnoreCase(uuid);
+    }
 }

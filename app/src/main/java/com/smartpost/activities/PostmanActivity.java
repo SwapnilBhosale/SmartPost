@@ -1,7 +1,9 @@
 package com.smartpost.activities;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -13,11 +15,17 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,6 +39,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.smartpost.Entity.PostManClientMap;
+import com.smartpost.LoginActivity;
 import com.smartpost.R;
 import com.smartpost.core.ApplicationSetting;
 import com.smartpost.services.LocationService;
@@ -76,6 +85,13 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
 
     private List<PostManClientMap> mapList = new ArrayList();
 
+    private ListView listViewPostman;
+    private CustomListAdapter adapter;
+
+    private  ChildEventListener eventListener;
+
+    private String emailId = ApplicationSetting.getInstance().getUserEmail();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,35 +99,77 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
         initUi();
         initSpinnerDialogue();
 
-        endJourney.setEnabled(false);
+        //endJourney.setEnabled(false);
 
+        adapter = new CustomListAdapter(this,R.layout.list_item,mapList);
+        listViewPostman.setAdapter(adapter);
+        addListeners();
         //intializing scan object
         qrScan = new IntentIntegrator(this);
 
         location = fetchCurrentLocation();
     }
 
+    private  void addListeners(){
+        listViewPostman.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                PostManClientMap p = mapList.get(i);
+
+                //got uuid of postman//
+                openMapsActivity(p.getUuid(),p.getAddress(),p.getConsignmentId());
+            }
+        });
+    }
+
+    private void openMapsActivity(String uuid,String address,String id){
+        Intent intent = new Intent(this,MapsActivity.class);
+        intent.putExtra(Constants.FIREBASE_UUID,uuid);
+
+        intent.putExtra(Constants.ACTOR,Constants.ACTOR_POSTMAM);
+
+        int consignmentCount =mapList.size();
+        intent.putExtra(Constants.CONSIG_LEN,consignmentCount);
+        for(int i=1 ; i <= consignmentCount; i++){
+            PostManClientMap p = mapList.get((i-1));
+            intent.putExtra(Constants.FIREBASE_ADDRSS.concat("_"+i),p.getAddress());
+            intent.putExtra(Constants.CONSIG_NAME.concat("_"+i),p.getConsignmentId());
+        }
+
+        startActivity(intent);
+    }
 
 
     private void addPostManConsignementListener(){
        mapListener = FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POSTMAN__CONSIGNMENT_MAP);
-       mapListener.addChildEventListener(new ChildEventListener() {
+       final String uuId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        eventListener =  mapListener.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-               map.put(dataSnapshot.getKey(),dataSnapshot.getValue(PostManClientMap.class));
-               updateMapList();
+                PostManClientMap p = dataSnapshot.getValue(PostManClientMap.class);
+                if(p.isBelongToPostman(uuId)) {
+                    map.put(dataSnapshot.getKey(), dataSnapshot.getValue(PostManClientMap.class));
+                    updateMapList();
+                }
             }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                map.put(dataSnapshot.getKey(),dataSnapshot.getValue(PostManClientMap.class));
-                updateMapList();
+                PostManClientMap p = dataSnapshot.getValue(PostManClientMap.class);
+                if(p.isBelongToPostman(uuId)) {
+                    map.put(dataSnapshot.getKey(), dataSnapshot.getValue(PostManClientMap.class));
+                    updateMapList();
+                }
             }
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-                map.remove(dataSnapshot.getKey());
-                updateMapList();
+                PostManClientMap p = dataSnapshot.getValue(PostManClientMap.class);
+                if(p.isBelongToPostman(uuId)) {
+                    map.remove(dataSnapshot.getKey());
+                    updateMapList();
+                }
             }
 
             @Override
@@ -127,8 +185,19 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
 
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mapListener.removeEventListener(eventListener);
+    }
+
     private void updateMapList(){
+        mapList.clear();
+        adapter.clear();
         mapList = new ArrayList(map.values());
+        Log.d(TAG, "updateMapList: Size : "+mapList.size());
+        adapter.setList(mapList);
+        adapter.notifyDataSetChanged();
 
     }
 
@@ -237,7 +306,7 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu, menu);
+        inflater.inflate(R.menu.menu1, menu);
         return true;
     }
 
@@ -251,14 +320,37 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
 
                 String uuId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
+                //Do we need to remove the mapping ?
+                for (Map.Entry<String, PostManClientMap> entry : map.entrySet()) {
+                    PostManClientMap p = entry.getValue();
+                    if(p.isBelongToPostman(uuId)){
+                        FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POSTMAN__CONSIGNMENT_MAP).child(entry.getKey()).getRef().removeValue();
+                    }
+                    // ...
+                }
                 DatabaseReference databaseReference =  FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POSTMAN_KEY).child(uuId);
 
-                // push hospital extension
-                databaseReference.child(Constants.FIREBASE_TOKEN).setValue("");
+                databaseReference.getRef().removeValue(new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                        pd.dismiss();
+                        openLoginActivity();
+                    }
+                });
+                break;
+            case R.id.action_scan_qr :
+                qrScan.initiateScan();
                 break;
         }
         super.onOptionsItemSelected(item);
         return true;
+    }
+
+    private void openLoginActivity(){
+        Intent intent = new Intent(this,LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
     }
 
     private  void deleteFirebaseData(){
@@ -336,20 +428,21 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
     }
 
     private void initUi(){
-        showConsignments = findViewById(R.id.showConsignments);
+        /*showConsignments = findViewById(R.id.showConsignments);
         endJourney = findViewById(R.id.endJourney);
-        scanQR = findViewById(R.id.scanQR);
+        scanQR = findViewById(R.id.scanQR);*/
 
+        listViewPostman = findViewById(R.id.listViewPostman);
         qrScan = new IntentIntegrator(PostmanActivity.this);
-        scanQR.setOnClickListener(new View.OnClickListener() {
+       /* scanQR.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Toast.makeText(PostmanActivity.this,"Clicked on scan QR",Toast.LENGTH_SHORT).show();
                 //intializing scan object
-                qrScan.initiateScan();
+
 
             }
-        });
+        });*/
     }
 
     @Override
@@ -426,6 +519,70 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
 
     @Override
     public void onProviderDisabled(String s) {
+
+    }
+
+    public class CustomListAdapter extends ArrayAdapter<PostManClientMap> {
+
+        @Override
+        public int getCount() {
+            return list.size();
+        }
+
+        @Nullable
+        @Override
+        public PostManClientMap getItem(int position) {
+            return this.list.get(position);
+        }
+
+        private Context context;
+        private List<PostManClientMap> list;
+        int layoutResourceId;
+
+
+        public CustomListAdapter(Context context, int layoutResourceId, List<PostManClientMap> list) {
+            super(context, layoutResourceId, list);
+            this.layoutResourceId = layoutResourceId;
+            this.list = list;
+            this.context = context;
+        }
+
+
+        @NonNull
+        @Override
+        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+            View row = convertView;
+           MapHolder holder = null;
+            if (row == null) {
+                LayoutInflater inflater = ((Activity) context).getLayoutInflater();
+                row = inflater.inflate(layoutResourceId, parent, false);
+                holder = new MapHolder();
+                holder.textView1 = row.findViewById(R.id.textView1);
+                holder.textView2 = row.findViewById(R.id.textView2);
+                row.setTag(holder);
+            } else {
+                holder = (MapHolder) row.getTag();
+            }
+            PostManClientMap p = list.get(position);
+            Log.d(TAG, "getView: " + p.toString());
+            holder.textView1.setText("Consignement Id : " + p.getConsignmentId());
+            holder.textView2.setText("Delivery Address : " + p.getAddress());
+            return row;
+        }
+
+
+        class MapHolder {
+            TextView textView1;
+            TextView textView2;
+        }
+
+
+        public void setList(List<PostManClientMap> list) {
+            this.list.clear();
+            this.list.addAll(list);
+            this.notifyDataSetChanged();
+        }
+
 
     }
 }

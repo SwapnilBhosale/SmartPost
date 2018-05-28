@@ -34,18 +34,33 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 import com.smartpost.Entity.PostMan;
+import com.smartpost.Entity.PostManClientMap;
 import com.smartpost.R;
 import com.smartpost.utils.Constants;
 import com.smartpost.utils.HttpConnection;
 import com.smartpost.utils.PathJsonParser;
 
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 
 public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarkerClickListener,OnMapReadyCallback,ValueEventListener {
@@ -126,6 +141,100 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         }
     }
 
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+
+        if (result != null) {
+            //if qrcode has nothing in it
+            if (result.getContents() == null) {
+                Toast.makeText(this, "Result Not Found", Toast.LENGTH_LONG).show();
+            } else {
+                //if qr contains data
+                try {
+                    Log.d(TAG, "onActivityResult: "+result.getContents());
+
+                    parseAadharData(result.getContents());
+
+                    //finsish the activity
+                    finish();
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    //if control comes here
+                    //that means the encoded format not matches
+                    //in this case you can display whatever data is available on the qrcode
+                    //to a toast
+                    Toast.makeText(this, result.getContents(), Toast.LENGTH_LONG).show();
+                }
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    public Document getDomElement(String xml){
+        Document doc = null;
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        try {
+
+            DocumentBuilder db = dbf.newDocumentBuilder();
+
+            InputSource is = new InputSource();
+            is.setCharacterStream(new StringReader(xml));
+            doc = db.parse(is);
+
+        } catch (ParserConfigurationException e) {
+            Log.e("Error: ", e.getMessage());
+            return null;
+        } catch (SAXException e) {
+            Log.e("Error: ", e.getMessage());
+            return null;
+        } catch (IOException e) {
+            Log.e("Error: ", e.getMessage());
+            return null;
+        }
+        // return DOM
+        return doc;
+    }
+
+    public String getValue(Element item, String str) {
+        NodeList n = item.getElementsByTagName(str);
+        return this.getElementValue(n.item(0));
+    }
+
+    public final String getElementValue( Node elem ) {
+        Node child;
+        if( elem != null){
+            if (elem.hasChildNodes()){
+                for( child = elem.getFirstChild(); child != null; child = child.getNextSibling() ){
+                    if( child.getNodeType() == Node.TEXT_NODE  ){
+                        return child.getNodeValue();
+                    }
+                }
+            }
+        }
+        return "";
+    }
+
+    private void parseAadharData(String xmlData){
+        Document dom = getDomElement(xmlData);
+        NodeList nl =  dom.getElementsByTagName("PrintLetterBarcodeData");
+        Log.d(TAG, "parseAadharData: length : "+nl.getLength());
+
+        //got adhar data here
+        //need to update PostmanCon map with status delivered
+        for(int i=0;i<nl.getLength();i++){
+            Element e = (Element)nl.item(i);
+            String uid = e.getAttribute("uid");
+            String name =  e.getAttribute("name");
+            String dob =  e.getAttribute("dob");
+            Toast.makeText(this,"Uid : "+uid+" name : "+name+" dob : "+dob,Toast.LENGTH_LONG).show();
+        }
+    }
+
+
     private void checkIntent() {
         Intent intent = getIntent();
 
@@ -137,14 +246,37 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
 
             String actor = intent.getStringExtra(Constants.ACTOR);
            // do the patient related stuff in this if else
-            if(actor.equalsIgnoreCase(Constants.ACTOR_POSTMAM))
-           {
-              /* Actor = PATIENT_ACTOR;
+            Actor = actor;
+            if(actor.equalsIgnoreCase(Constants.ACTOR_POSTMAM)) {
 
-               bottomText.setVisibility(View.VISIBLE);
-               bottomText.setText("Waiting For Ambulance");
 
-               patientUUID=intent.getStringExtra(Constant.FIREBASE_UUID);
+                String postmanUUID = intent.getStringExtra(Constants.FIREBASE_UUID);
+                //String address = intent.getStringExtra(Constants.FIREBASE_ADDRSS);
+                //String id = intent.getStringExtra(Constants.CONSIG_NAME);
+                //Log.d(TAG, "checkIntent: postmanUUID : "+postmanUUID);
+
+
+                int count = intent.getIntExtra(Constants.CONSIG_LEN,0);
+                do {
+                    String address = intent.getStringExtra(Constants.FIREBASE_ADDRSS.concat("_"+count));
+                    String id = intent.getStringExtra(Constants.FIREBASE_ADDRSS.concat("_"+count));
+                    addConsignmentMarker(address, id);
+                    count--;
+                }while(count >0);
+                fetchPostmanDetail(postmanUUID);
+
+               //bottomText.setVisibility(View.VISIBLE);
+               //bottomText.setText("Waiting For Ambulance");
+               endJourneyBtn.setVisibility(View.VISIBLE);
+               endJourneyBtn.setOnClickListener(new View.OnClickListener() {
+                   @Override
+                   public void onClick(View view) {
+                       IntentIntegrator qrScan = new IntentIntegrator(MapsActivity.this);
+                       qrScan.initiateScan();
+                   }
+               });
+
+              /* patientUUID=intent.getStringExtra(Constant.FIREBASE_UUID);
                System.out.println("UUID"+patientUUID);
                // trackAmbulance(patientUUID);
                FirebaseDatabase.getInstance().getReference().child(Constant.FIREBASE_PATIENT_KEY).child(patientUUID).addValueEventListener(new ValueEventListener() {

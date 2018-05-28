@@ -18,16 +18,15 @@
 
     <TextView
 
-        android:visibility="gone"
-        android:gravity="center"
-        android:background="#bababa"
         android:id="@+id/maps_bottom_text"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-
-         />
+        android:layout_alignParentRight="true"
+        android:background="#bababa"
+        android:gravity="center"
+        android:visibility="gone" />
 
     <Button
         android:visibility="gone"
@@ -38,18 +37,18 @@
         android:text="I have Picked Up Patient"
         android:layout_alignParentBottom="true"
         android:layout_toEndOf="@+id/maps_bottom_text"
-         />
+        android:layout_toRightOf="@+id/maps_bottom_text" />
 
     <Button
-        android:visibility="gone"
         android:id="@+id/btn_conference_hosp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="39dp"
-        android:text="Conference Call"
         android:layout_alignParentBottom="true"
+        android:layout_marginBottom="39dp"
         android:layout_toEndOf="@+id/maps_bottom_text"
-        />
+        android:layout_toRightOf="@+id/maps_bottom_text"
+        android:text="Conference Call"
+        android:visibility="gone" />
 
     <Button
         android:visibility="gone"
@@ -57,12 +56,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="39dp"
-        android:text="END JOURNEY"
+        android:text="Delivery"
         android:layout_alignParentBottom="true"
         android:layout_toEndOf="@+id/maps_bottom_text"
-        />
-
-
+        android:layout_toRightOf="@+id/maps_bottom_text"/>
 </RelativeLayout>
 
 

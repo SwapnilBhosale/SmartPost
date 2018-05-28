@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center_vertical">
+    android:background="#FAFAFA"
+    android:orientation="vertical">
 
-    <Button
+   <!-- <Button
         android:id="@+id/showConsignments"
         style="@style/ButtonStyle"
         android:layout_width="match_parent"
@@ -17,8 +19,8 @@
         android:padding="3dp"
         android:text="Show Consignments"
         android:layout_alignRight="@+id/endJourney" />
-
-    <Button
+-->
+   <!-- <Button
         android:id="@+id/endJourney"
         style="@style/ButtonStyle"
         android:layout_width="match_parent"
@@ -27,8 +29,8 @@
         android:layout_margin="10dp"
         android:padding="3dp"
         android:text="End Journey" />
-
-    <Button
+-->
+   <!-- <Button
         android:id="@+id/scanQR"
         style="@style/ButtonStyle"
         android:layout_width="match_parent"
@@ -36,7 +38,7 @@
         android:layout_below="@+id/endJourney"
         android:layout_margin="10dp"
         android:padding="3dp"
-        android:text="Scan QR" />
+        android:text="Scan QR" />-->
 
    <!-- <include
         layout="@layout/footer_healthcaredemo"
@@ -45,5 +47,12 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />-->
 
-</RelativeLayout>
+   <ListView
+       android:id="@+id/listViewPostman"
+       android:layout_width="match_parent"
+       android:divider="#f0f0f0"
+       android:dividerHeight="7dp"
+       android:layout_height="wrap_content"/>
+
+</LinearLayout>
 

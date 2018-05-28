@@ -69,8 +69,6 @@ public class LoginActivity extends AppCompatActivity implements  View.OnClickLis
     private RadioGroup roleGroup;
     private RadioButton lastRadioButton;
     private LinearLayout configLayout;
-
-    private LoginReceiver loginReceiver;
     private ProgressDialog pd = null;
     private FirebaseAuth mAuth;
     private EditText email,userLat,userLon;
@@ -116,8 +114,6 @@ public class LoginActivity extends AppCompatActivity implements  View.OnClickLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-        loginReceiver = new LoginReceiver();
         initSpinner();
         mAuth = FirebaseAuth.getInstance();
         initUi();
@@ -314,15 +310,6 @@ public class LoginActivity extends AppCompatActivity implements  View.OnClickLis
         }
         updateDropDownList();
        // showActorField();
-    }
-
-
-    class LoginReceiver extends BroadcastReceiver{
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-        }
     }
 }
 
