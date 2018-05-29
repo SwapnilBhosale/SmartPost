@@ -203,16 +203,13 @@ public class PostOfficeActivity extends AppCompatActivity implements LogoutServi
             StringBuilder sb = new StringBuilder();
             sb.append("Id : ")
                     .append(p.getConsignmentId())
-                    .append("\n")
-                    .append("status : ")
-                    .append(status)
-                .   append("\n");
+                    .append(" status : ")
+                    .append(status);
             if(status.equalsIgnoreCase(ConsignmentStatus.DELIVERED.toString())){
-                sb.append("Receiver Name : ")
+                sb.append(" Receiver Name : ")
                         .append(details.getName())
-                        .append("Receiver UID : ")
-                        .append(details.getUid())
-                        .append("\n");
+                        .append(" Receiver UID : ")
+                        .append(details.getUid());
             }
             intent.putExtra(Constants.CONSIG_DETAILS.concat("_"+i),sb.toString());
         }

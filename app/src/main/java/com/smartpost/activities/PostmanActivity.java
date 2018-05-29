@@ -87,6 +87,8 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
 
     private Map<String,PostManClientMap> map = new HashMap();
 
+    private Map<String,PostManClientMap> allMap = new HashMap();
+
     private List<PostManClientMap> mapList = new ArrayList();
 
     private ListView listViewPostman;
@@ -156,8 +158,9 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 PostManClientMap p = dataSnapshot.getValue(PostManClientMap.class);
+                allMap.put(dataSnapshot.getKey(), p);
                 if(p.isBelongToPostman(uuId)) {
-                    map.put(dataSnapshot.getKey(), dataSnapshot.getValue(PostManClientMap.class));
+                    map.put(dataSnapshot.getKey(), p);
                     updateMapList();
                 }
             }
@@ -165,8 +168,9 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
             @Override
             public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 PostManClientMap p = dataSnapshot.getValue(PostManClientMap.class);
+                allMap.put(dataSnapshot.getKey(), p);
                 if(p.isBelongToPostman(uuId)) {
-                    map.put(dataSnapshot.getKey(), dataSnapshot.getValue(PostManClientMap.class));
+                    map.put(dataSnapshot.getKey(), p);
                     updateMapList();
                 }
             }
@@ -174,6 +178,7 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
             @Override
             public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
                 PostManClientMap p = dataSnapshot.getValue(PostManClientMap.class);
+                allMap.remove(dataSnapshot.getKey());
                 if(p.isBelongToPostman(uuId)) {
                     map.remove(dataSnapshot.getKey());
                     updateMapList();
@@ -451,13 +456,19 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
     }
 
     private void removeOldAssignmentIfAssigned(String id){
-        String uuId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        //Do we need to remove the mapping ?
-        for (Map.Entry<String, PostManClientMap> entry : map.entrySet()) {
+        Log.d(TAG, "removeOldAssignmentIfAssigned: id "+id);
+
+        for (final Map.Entry<String, PostManClientMap> entry : allMap.entrySet()) {
             PostManClientMap p = entry.getValue();
+            Log.d(TAG, "removeOldAssignmentIfAssigned: MapId "+p.getConsignmentId());
             if(p.getConsignmentId().equalsIgnoreCase(id)){
-                FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POSTMAN__CONSIGNMENT_MAP).child(entry.getKey()).getRef().removeValue();
+                FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POSTMAN__CONSIGNMENT_MAP).child(entry.getKey()).getRef().removeValue(new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                        Log.d(TAG, "onComplete: Data removed for key :"+entry.getKey());
+                    }
+                });
                 break;
             }
             // ...

@@ -127,7 +127,6 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
     }
 
     private void addMarker(LatLng latLng,String name){
-        Log.d(TAG, "addMarker Consignment: "+latLng.latitude+" name : "+name);
       mMap.addMarker(new MarkerOptions().position(latLng).title(name));
     }
 
