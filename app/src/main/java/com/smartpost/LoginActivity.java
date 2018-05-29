@@ -270,6 +270,7 @@ public class LoginActivity extends AppCompatActivity implements  View.OnClickLis
                 dropdownList.addAll(postOffList);
                 break;
         }
+        emailId = dropdownList.get(0);
         dataAdapter.notifyDataSetChanged();
     }
     @Override

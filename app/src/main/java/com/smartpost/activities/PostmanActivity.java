@@ -75,7 +75,7 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
 
     private LocationManager locationManager;
     // The minimum time between updates in milliseconds
-    private static final long MIN_TIME_BW_UPDATES = 0; // 1 minute
+    private static final long MIN_TIME_BW_UPDATES = 1; // 1 minute
     private boolean isGPSEnabled;
     private boolean isNetworkEnabled;
     private boolean canGetLocation = false;
@@ -94,6 +94,8 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
     private  ChildEventListener eventListener;
 
     private String emailId = ApplicationSetting.getInstance().getUserEmail();
+
+    private final int MY_PERMISSIONS_REQUEST_GPS = 999;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -194,6 +196,7 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
     protected void onPause() {
         super.onPause();
         mapListener.removeEventListener(eventListener);
+
     }
 
     private void updateMapList(){
@@ -204,6 +207,22 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
         adapter.setList(mapList);
         adapter.notifyDataSetChanged();
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode){
+            case MY_PERMISSIONS_REQUEST_GPS: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG, "onRequestPermissionsResult: Request granted to GPS");
+                } else{
+                    Log.d(TAG, "onRequestPermissionsResult: Permission is not granted");
+                }
+             }
+             return;
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     /*fetch current location of patient*/
@@ -221,7 +240,13 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
                 //                                          int[] grantResults)
                 // to handle the case where the user grants the permission. See the documentation
                 // for ActivityCompat#requestPermissions for more details.
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION},
+                        MY_PERMISSIONS_REQUEST_GPS);
                 return null;
+            }else{
+                Log.d(TAG, "fetchCurrentLocation: Already have permission");
             }
             locationManager.requestLocationUpdates(
                     LocationManager.NETWORK_PROVIDER,
@@ -247,11 +272,6 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
                 this.canGetLocation = true;
                 // First get location from Network Provider
                 if (isNetworkEnabled) {
-                    if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                            ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        // permision not granted
-                        // return 0;
-                    }
 
                     // resetting updates
                     locationManager.removeUpdates(this);
@@ -372,12 +392,16 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
     @Override
     protected void onDestroy() {
         deleteFirebaseData();
+        this.stopService(serviceIntent);
         super.onDestroy();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        locationService = new LocationService();
+        serviceIntent = new Intent(this,LocationService.class);
+        this.startService(serviceIntent);
         uploadDataToServer();
         addPostManConsignementListener();
     }
@@ -426,9 +450,6 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
         pd.setCancelable(false);
         pd.setMessage("Loading...");
         pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-
-        locationService = new LocationService();
-        serviceIntent = new Intent(this,LocationService.class);
 
     }
 
