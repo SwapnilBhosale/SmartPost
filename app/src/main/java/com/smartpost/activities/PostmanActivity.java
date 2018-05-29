@@ -49,6 +49,7 @@ import com.smartpost.utils.Constants;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -118,9 +119,10 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 PostManClientMap p = mapList.get(i);
-
-                //got uuid of postman//
-                openMapsActivity(p.getUuid(),p.getAddress(),p.getConsignmentId());
+                if(p.getDetails().getStatus().equalsIgnoreCase(ConsignmentStatus.DELIVERED.toString()))
+                    Toast.makeText(PostmanActivity.this,"Consignment is already Delivered !",Toast.LENGTH_SHORT).show();
+                else
+                    openMapsActivity(p.getUuid(),p.getAddress(),p.getConsignmentId());
             }
         });
     }
@@ -567,6 +569,8 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
                 holder = new MapHolder();
                 holder.textView1 = row.findViewById(R.id.textView1);
                 holder.textView2 = row.findViewById(R.id.textView2);
+                holder.textView3 = row.findViewById(R.id.textView3);
+                holder.textView4 = row.findViewById(R.id.textView3);
                 row.setTag(holder);
             } else {
                 holder = (MapHolder) row.getTag();
@@ -575,6 +579,12 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
             Log.d(TAG, "getView: " + p.toString());
             holder.textView1.setText("Consignement Id : " + p.getConsignmentId());
             holder.textView2.setText("Delivery Address : " + p.getAddress());
+            holder.textView3.setText("Consignment Status : " + p.getDetails().getStatus());
+            if(p.getDetails().getStatus().equalsIgnoreCase(ConsignmentStatus.DELIVERED.toString())){
+                    ReceiverDetails details = p.getDetails();
+                    holder.textView4.setVisibility(View.VISIBLE);
+                    holder.textView4.setText(" Name of receiver : "+details.getName()+"\nAadhar UID : "+details.getUid()+"\nDOB : "+details.getDob());
+            }
             return row;
         }
 
@@ -582,6 +592,8 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
         class MapHolder {
             TextView textView1;
             TextView textView2;
+            TextView textView3;
+            TextView textView4;
         }
 
 
