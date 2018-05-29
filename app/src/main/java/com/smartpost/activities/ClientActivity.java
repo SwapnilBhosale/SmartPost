@@ -28,11 +28,15 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.smartpost.entities.ConsignmentStatus;
 import com.smartpost.entities.PostManClientMap;
 import com.smartpost.LoginActivity;
 import com.smartpost.R;
 import com.smartpost.core.ApplicationSetting;
+import com.smartpost.entities.ReceiverDetails;
 import com.smartpost.utils.Constants;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -280,6 +284,8 @@ public class ClientActivity extends AppCompatActivity {
                 holder = new MapHolder();
                 holder.textView1 = row.findViewById(R.id.textView1);
                 holder.textView2 = row.findViewById(R.id.textView2);
+                holder.textView3 = row.findViewById(R.id.textView3);
+                holder.textView4 = row.findViewById(R.id.textView4);
                 row.setTag(holder);
             }else{
                 holder = (MapHolder)row.getTag();
@@ -288,6 +294,10 @@ public class ClientActivity extends AppCompatActivity {
             Log.d(TAG, "getView: "+p.toString());
             holder.textView1.setText("Consignement Id : "+p.getConsignmentId());
             holder.textView2.setText("Delivery Address : "+p.getAddress());
+            holder.textView3.setText("Status : "+p.getDetails().getStatus());
+            ReceiverDetails d = p.getDetails();
+            if(p.getDetails().getStatus().equalsIgnoreCase(ConsignmentStatus.DELIVERED.toString()))
+                holder.textView4.setText("Received by : "+d.getName());
            return row;
         }
 
@@ -295,6 +305,8 @@ public class ClientActivity extends AppCompatActivity {
         class MapHolder {
             TextView textView1;
             TextView textView2;
+            TextView textView3;
+            TextView textView4;
         }
 
 

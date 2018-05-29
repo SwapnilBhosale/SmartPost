@@ -326,7 +326,20 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
 
                 Actor = TRAFFIC_ACTOR;*/
 
-           }
+
+                postmanUUID = intent.getStringExtra(Constants.FIREBASE_UUID);
+
+                int count = intent.getIntExtra(Constants.CONSIG_LEN,0);
+                do {
+                    String address = intent.getStringExtra(Constants.FIREBASE_ADDRSS.concat("_"+count));
+                    String details = intent.getStringExtra(Constants.CONSIG_DETAILS.concat("_"+count));
+                    addConsignmentMarkerPostOffice(address, details);
+                    count--;
+                }while(count >0);
+                fetchPostmanDetail(postmanUUID);
+
+
+            }
            /* // do the ambulance related stuff in this if else
            else if(actor.equalsIgnoreCase(Constant.ACTOR_AMBULANCE))
             {
@@ -459,11 +472,13 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
 
     }*/
 
+    DatabaseReference mapListener;
+    ChildEventListener eventListener;
 
     private void UpdateConsignmentStatus (final ReceiverDetails details) {
-        final DatabaseReference mapListener = FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POSTMAN__CONSIGNMENT_MAP);
+        mapListener = FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POSTMAN__CONSIGNMENT_MAP);
         final String uuId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        ChildEventListener eventListener =  mapListener.addChildEventListener(new ChildEventListener() {
+        eventListener =  mapListener.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 PostManClientMap p = dataSnapshot.getValue(PostManClientMap.class);
@@ -497,8 +512,10 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
     }
 
 
+    private  DatabaseReference reference;
+    private ChildEventListener listener;
     private void fetchPostmanDetail(String uuid){
-        final DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POSTMAN_KEY).child(uuid);
+       reference = FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POSTMAN_KEY).child(uuid);
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -507,7 +524,8 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
                 Log.d(TAG, "onDataChange: PostMan Data : "+p.toString());
                 postManLatLng = new LatLng(p.getLatitude(),p.getLongitude());
                 trackPostman(p.getLatitude(),p.getLongitude(),p.getEmail());
-                drawPathFromOriginToDestination(postManLatLng,consignmentLatLng);
+                if(!Actor.equalsIgnoreCase(Constants.ACTOR_POSTOFFICE))
+                    drawPathFromOriginToDestination(postManLatLng,consignmentLatLng);
 
                 //trackAmbulance(ambulanceUUID);
             }
@@ -524,6 +542,11 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
     private String consignmentId = null;
 
     private void addConsignmentMarker(String address,String id){
+        consignmentLatLng= getLocationFromAddress(this,address);
+        addMarker(consignmentLatLng,id);
+    }
+
+    private void addConsignmentMarkerPostOffice(String address,String id){
         consignmentLatLng= getLocationFromAddress(this,address);
         addMarker(consignmentLatLng,id);
     }
@@ -703,6 +726,11 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
             FirebaseDatabase.getInstance().getReference().child(Constant.FIREBASE_AMBULANCE_KEY).child(ambulanceUUID).removeEventListener(this);
         }*/
         mMap.clear();
+        if(eventListener!= null && mapListener != null)
+            mapListener.removeEventListener(eventListener);
+        if(reference!= null && listener != null)
+            reference.removeEventListener(listener);
+
         super.onDestroy();
     }
 

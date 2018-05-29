@@ -28,5 +28,7 @@ public class Constants {
     public static final String CONSIG_LEN = "consigLen";
     public static final String CONSIG_DETAILS = "consigDetails";
     public static final String CONSIG_INDEX = "consigIndex";
+    public static final String CONSIG_STATUS = "consigStatus";
+    public static final String CONSIG_RECEIVER_NAME = "consigRecName";
 
 }

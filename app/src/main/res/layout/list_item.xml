@@ -31,10 +31,10 @@
         <TextView
             android:id="@+id/textView4"
             android:paddingTop="5dp"
-            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text=""/>
+
 
     </LinearLayout>
 

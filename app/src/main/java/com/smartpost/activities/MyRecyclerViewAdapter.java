@@ -35,6 +35,7 @@ public class MyRecyclerViewAdapter extends RecyclerView
         TextView postmanDetail;
         TextView postmanLatLng;
         TextView currLocation;
+        TextView consignmentDetails;
        // TextView diagnosis;
 
         public DataObjectHolder(View itemView) {
