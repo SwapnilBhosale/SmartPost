@@ -34,6 +34,7 @@ import com.smartpost.LoginActivity;
 import com.smartpost.R;
 import com.smartpost.core.ApplicationSetting;
 import com.smartpost.entities.ReceiverDetails;
+import com.smartpost.services.LogoutService;
 import com.smartpost.utils.Constants;
 
 import org.w3c.dom.Text;
@@ -43,7 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ClientActivity extends AppCompatActivity {
+public class ClientActivity extends AppCompatActivity implements LogoutService {
 
     private static final String TAG = ClientActivity.class.getSimpleName();
 
@@ -204,20 +205,7 @@ public class ClientActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.action_logout :
-                pd.show();
-
-                //clear token
-
-                String uuId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-                DatabaseReference databaseReference =  FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_CLIENT_KEY).child(uuId);
-                databaseReference.getRef().removeValue(new DatabaseReference.CompletionListener() {
-                    @Override
-                    public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
-                        pd.dismiss();
-                        openLoginActivity();
-                    }
-                });
+                logout();
                 break;
         }
         super.onOptionsItemSelected(item);
@@ -241,8 +229,26 @@ public class ClientActivity extends AppCompatActivity {
 
     private  void deleteFirebaseData(){
         if(FirebaseAuth.getInstance().getCurrentUser()!=null) {
-            FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POSTMAN_KEY).child(FirebaseAuth.getInstance().getCurrentUser().getUid()).removeValue();
+            FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_CLIENT_KEY).child(FirebaseAuth.getInstance().getCurrentUser().getUid()).removeValue();
         }
+    }
+
+    @Override
+    public void logout() {
+        pd.show();
+
+        //clear token
+
+        String uuId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        DatabaseReference databaseReference =  FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_CLIENT_KEY).child(uuId);
+        databaseReference.getRef().removeValue(new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                pd.dismiss();
+                openLoginActivity();
+            }
+        });
     }
 
 
@@ -321,7 +327,7 @@ public class ClientActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        deleteFirebaseData();
+        //deleteFirebaseData();
         super.onDestroy();
 
     }

@@ -45,6 +45,7 @@ import com.smartpost.R;
 import com.smartpost.core.ApplicationSetting;
 import com.smartpost.entities.ReceiverDetails;
 import com.smartpost.services.LocationService;
+import com.smartpost.services.LogoutService;
 import com.smartpost.utils.Constants;
 
 import org.json.JSONException;
@@ -56,7 +57,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PostmanActivity extends AppCompatActivity implements LocationListener {
+public class PostmanActivity extends AppCompatActivity implements LocationListener,LogoutService {
 
     private ProgressDialog pd = null;
     private LocationService locationService;
@@ -339,29 +340,7 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.action_logout :
-                pd.show();
-
-                //clear token
-
-                String uuId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-                //Do we need to remove the mapping ?
-                for (Map.Entry<String, PostManClientMap> entry : map.entrySet()) {
-                    PostManClientMap p = entry.getValue();
-                    if(p.isBelongToPostman(uuId)){
-                        FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POSTMAN__CONSIGNMENT_MAP).child(entry.getKey()).getRef().removeValue();
-                    }
-                    // ...
-                }
-                DatabaseReference databaseReference =  FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POSTMAN_KEY).child(uuId);
-
-                databaseReference.getRef().removeValue(new DatabaseReference.CompletionListener() {
-                    @Override
-                    public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
-                        pd.dismiss();
-                        openLoginActivity();
-                    }
-                });
+                logout();
                 break;
             case R.id.action_scan_qr :
                 qrScan.initiateScan();
@@ -391,7 +370,7 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
 
     @Override
     protected void onDestroy() {
-        deleteFirebaseData();
+        //deleteFirebaseData();
         this.stopService(serviceIntent);
         super.onDestroy();
     }
@@ -471,6 +450,20 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
         });*/
     }
 
+    private void removeOldAssignmentIfAssigned(String id){
+        String uuId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        //Do we need to remove the mapping ?
+        for (Map.Entry<String, PostManClientMap> entry : map.entrySet()) {
+            PostManClientMap p = entry.getValue();
+            if(p.getConsignmentId().equalsIgnoreCase(id)){
+                FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POSTMAN__CONSIGNMENT_MAP).child(entry.getKey()).getRef().removeValue();
+                break;
+            }
+            // ...
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
@@ -478,17 +471,23 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
         if (result != null) {
             //if qrcode has nothing in it
             if (result.getContents() == null) {
-                Toast.makeText(this, "Result Not Found", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Scan QR failed", Toast.LENGTH_LONG).show();
             } else {
                 //if qr contains data
                 try {
+
+
                     //converting the data to json
                     JSONObject obj = new JSONObject(result.getContents());
                     //Toast.makeText(this, obj.toString(), Toast.LENGTH_LONG).show();
                     PostManClientMap postManClientMap = new PostManClientMap(obj.getString("email"),FirebaseAuth.getInstance().getCurrentUser().getUid());
                     postManClientMap.setAddress(obj.getString("address"));
-                    postManClientMap.setConsignmentId(obj.getString("consignmentId"));
 
+                    String consignmentId = obj.getString("consignmentId");
+                    postManClientMap.setConsignmentId(consignmentId);
+
+
+                    removeOldAssignmentIfAssigned(consignmentId);
                     //set default status to assigned when rq code is scanned
                     ReceiverDetails details = new ReceiverDetails();
                     details.setStatus(ConsignmentStatus.POSTMAN_ASSIGNED.toString());
@@ -551,6 +550,33 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
     @Override
     public void onProviderDisabled(String s) {
 
+    }
+
+    @Override
+    public void logout() {
+        pd.show();
+
+        //clear token
+
+        String uuId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        //Do we need to remove the mapping ?
+        for (Map.Entry<String, PostManClientMap> entry : map.entrySet()) {
+            PostManClientMap p = entry.getValue();
+            if(p.isBelongToPostman(uuId)){
+                FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POSTMAN__CONSIGNMENT_MAP).child(entry.getKey()).getRef().removeValue();
+            }
+            // ...
+        }
+        DatabaseReference databaseReference =  FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POSTMAN_KEY).child(uuId);
+
+        databaseReference.getRef().removeValue(new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                pd.dismiss();
+                openLoginActivity();
+            }
+        });
     }
 
     public class CustomListAdapter extends ArrayAdapter<PostManClientMap> {

@@ -21,6 +21,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.smartpost.LoginActivity;
 import com.smartpost.entities.ConsignmentStatus;
 import com.smartpost.entities.PostMan;
 import com.smartpost.entities.PostManClientMap;
@@ -28,6 +29,7 @@ import com.smartpost.entities.PostOffice;
 import com.smartpost.entities.ReceiverDetails;
 import com.smartpost.entities.User;
 import com.smartpost.R;
+import com.smartpost.services.LogoutService;
 import com.smartpost.utils.Constants;
 
 import java.util.ArrayList;
@@ -36,7 +38,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PostOfficeActivity extends AppCompatActivity {
+public class PostOfficeActivity extends AppCompatActivity implements LogoutService{
 
     private ProgressDialog pd = null;
 
@@ -283,9 +285,28 @@ public class PostOfficeActivity extends AppCompatActivity {
         return true;
     }
 
-    private  void deleteFirebaseData(){
-        if(FirebaseAuth.getInstance().getCurrentUser()!=null) {
-            FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POSTMAN_KEY).child(FirebaseAuth.getInstance().getCurrentUser().getUid()).removeValue();
-        }
+    @Override
+    public void logout() {
+        pd.show();
+
+        //clear token
+
+        String uuId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        DatabaseReference databaseReference =  FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POST_OFFICE_KEY).child(uuId);
+        databaseReference.getRef().removeValue(new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                pd.dismiss();
+                openLoginActivity();
+            }
+        });
+    }
+
+    private void openLoginActivity(){
+        Intent intent = new Intent(this,LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
     }
 }
