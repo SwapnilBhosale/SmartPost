@@ -8,6 +8,7 @@ import android.location.Geocoder;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
@@ -19,16 +20,13 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -36,14 +34,15 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
-import com.smartpost.Entity.PostMan;
-import com.smartpost.Entity.PostManClientMap;
+import com.smartpost.entities.ConsignmentStatus;
+import com.smartpost.entities.PostMan;
 import com.smartpost.R;
+import com.smartpost.entities.PostManClientMap;
+import com.smartpost.entities.ReceiverDetails;
 import com.smartpost.utils.Constants;
 import com.smartpost.utils.HttpConnection;
 import com.smartpost.utils.PathJsonParser;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -106,6 +105,8 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
 
     private LatLng consignmentLatLng;
 
+    private String postmanUUID;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -155,8 +156,8 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
                 try {
                     Log.d(TAG, "onActivityResult: "+result.getContents());
 
-                    parseAadharData(result.getContents());
-
+                    ReceiverDetails details = parseAadharData(result.getContents());
+                    UpdateConsignmentStatus(details);
                     //finsish the activity
                     finish();
 
@@ -218,20 +219,28 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         return "";
     }
 
-    private void parseAadharData(String xmlData){
+    private ReceiverDetails parseAadharData(String xmlData){
         Document dom = getDomElement(xmlData);
         NodeList nl =  dom.getElementsByTagName("PrintLetterBarcodeData");
         Log.d(TAG, "parseAadharData: length : "+nl.getLength());
 
+        ReceiverDetails details = null;
         //got adhar data here
         //need to update PostmanCon map with status delivered
         for(int i=0;i<nl.getLength();i++){
             Element e = (Element)nl.item(i);
-            String uid = e.getAttribute("uid");
+             details = new ReceiverDetails();
+            details.setName(e.getAttribute("name"));
+            details.setDob(e.getAttribute("dob"));
+            details.setStatus(ConsignmentStatus.DELIVERED.toString());
+            details.setUid(e.getAttribute("uid"));
+           /* String uid = e.getAttribute("uid");
             String name =  e.getAttribute("name");
             String dob =  e.getAttribute("dob");
-            Toast.makeText(this,"Uid : "+uid+" name : "+name+" dob : "+dob,Toast.LENGTH_LONG).show();
+*/
+            //Toast.makeText(this,"Uid : "+uid+" name : "+name+" dob : "+dob,Toast.LENGTH_LONG).show();
         }
+        return details;
     }
 
 
@@ -250,17 +259,19 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
             if(actor.equalsIgnoreCase(Constants.ACTOR_POSTMAM)) {
 
 
-                String postmanUUID = intent.getStringExtra(Constants.FIREBASE_UUID);
+                postmanUUID = intent.getStringExtra(Constants.FIREBASE_UUID);
                 //String address = intent.getStringExtra(Constants.FIREBASE_ADDRSS);
                 //String id = intent.getStringExtra(Constants.CONSIG_NAME);
                 //Log.d(TAG, "checkIntent: postmanUUID : "+postmanUUID);
+
+                String index = intent.getStringExtra(Constants.CONSIG_INDEX);
 
 
                 int count = intent.getIntExtra(Constants.CONSIG_LEN,0);
                 do {
                     String address = intent.getStringExtra(Constants.FIREBASE_ADDRSS.concat("_"+count));
-                    String id = intent.getStringExtra(Constants.FIREBASE_ADDRSS.concat("_"+count));
-                    addConsignmentMarker(address, id);
+                    String id = intent.getStringExtra(Constants.CONSIG_NAME.concat("_"+count));
+                    addConsignmentMarkers(address, id,index);
                     count--;
                 }while(count >0);
                 fetchPostmanDetail(postmanUUID);
@@ -448,6 +459,44 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
 
     }*/
 
+
+    private void UpdateConsignmentStatus (final ReceiverDetails details) {
+        final DatabaseReference mapListener = FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POSTMAN__CONSIGNMENT_MAP);
+        final String uuId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        ChildEventListener eventListener =  mapListener.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                PostManClientMap p = dataSnapshot.getValue(PostManClientMap.class);
+                if(p.isBelongToPostman(uuId) && p.getConsignmentId().equalsIgnoreCase(consignmentId)) {
+                    p.setDetails(details);
+                    mapListener.child(dataSnapshot.getKey()).setValue(p);
+                }
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+
     private void fetchPostmanDetail(String uuid){
         final DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POSTMAN_KEY).child(uuid);
         reference.addValueEventListener(new ValueEventListener() {
@@ -472,10 +521,26 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
     }
 
 
+    private String consignmentId = null;
+
     private void addConsignmentMarker(String address,String id){
         consignmentLatLng= getLocationFromAddress(this,address);
         addMarker(consignmentLatLng,id);
     }
+    private void addConsignmentMarkers(String address,String id,String index){
+        Log.d(TAG, "addConsignmentMarkers: index equal : "+index+" id:"+id);
+        if(index.equalsIgnoreCase(id)) {
+            consignmentId = id;
+            consignmentLatLng = getLocationFromAddress(this, address);
+            addMarker(consignmentLatLng,id);
+        }
+        else {
+            LatLng latLng = getLocationFromAddress(this, address);
+            addMarker(latLng,id);
+        }
+
+    }
+
 
     public LatLng getLocationFromAddress(Context context, String strAddress) {
 
@@ -907,9 +972,4 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
 
 
     }
-
-
-
-
-
 }

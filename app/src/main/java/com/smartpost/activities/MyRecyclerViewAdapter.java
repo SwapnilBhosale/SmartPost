@@ -3,7 +3,6 @@
 package com.smartpost.activities;
 
 import android.content.Context;
-import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
 import android.support.v7.widget.RecyclerView;
@@ -13,8 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.smartpost.Entity.PostMan;
-import com.smartpost.Entity.User;
+import com.smartpost.entities.PostMan;
 import com.smartpost.R;
 
 import java.util.List;

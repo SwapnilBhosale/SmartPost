@@ -20,9 +20,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
-import com.smartpost.Entity.PostMan;
-import com.smartpost.Entity.PostOffice;
-import com.smartpost.Entity.User;
+import com.smartpost.entities.PostMan;
+import com.smartpost.entities.PostOffice;
+import com.smartpost.entities.User;
 import com.smartpost.R;
 import com.smartpost.utils.Constants;
 

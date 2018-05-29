@@ -1,4 +1,4 @@
-package com.smartpost.Entity;
+package com.smartpost.entities;
 
 public class PostManClientMap {
 
@@ -7,11 +7,16 @@ public class PostManClientMap {
     private String address;
     private String consignmentId;
 
+    private ReceiverDetails details;
+
 
 
     public PostManClientMap(){
 
     }
+
+
+
     public PostManClientMap(String emailId, String uuid) {
         this.emailId = emailId;
         this.uuid = uuid;
@@ -66,5 +71,13 @@ public class PostManClientMap {
 
     public boolean isBelongToPostman(String uuid){
         return  this.uuid.equalsIgnoreCase(uuid);
+    }
+
+    public ReceiverDetails getDetails() {
+        return details;
+    }
+
+    public void setDetails(ReceiverDetails details) {
+        this.details = details;
     }
 }

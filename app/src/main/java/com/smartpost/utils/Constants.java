@@ -26,5 +26,7 @@ public class Constants {
     public static final String ACTOR_POSTOFFICE = "postoffice";
     public static final String CONSIG_NAME = "consigName";
     public static final String CONSIG_LEN = "consigLen";
+    public static final String CONSIG_DETAILS = "consigDetails";
+    public static final String CONSIG_INDEX = "consigIndex";
 
 }

@@ -1,4 +1,4 @@
-package com.smartpost.Entity;
+package com.smartpost.entities;
 
 public class PostOffice extends User {
 

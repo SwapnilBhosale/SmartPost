@@ -38,10 +38,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
-import com.smartpost.Entity.PostManClientMap;
+import com.smartpost.entities.ConsignmentStatus;
+import com.smartpost.entities.PostManClientMap;
 import com.smartpost.LoginActivity;
 import com.smartpost.R;
 import com.smartpost.core.ApplicationSetting;
+import com.smartpost.entities.ReceiverDetails;
 import com.smartpost.services.LocationService;
 import com.smartpost.utils.Constants;
 
@@ -128,6 +130,7 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
         intent.putExtra(Constants.FIREBASE_UUID,uuid);
 
         intent.putExtra(Constants.ACTOR,Constants.ACTOR_POSTMAM);
+        intent.putExtra(Constants.CONSIG_INDEX,id);
 
         int consignmentCount =mapList.size();
         intent.putExtra(Constants.CONSIG_LEN,consignmentCount);
@@ -462,6 +465,11 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
                     PostManClientMap postManClientMap = new PostManClientMap(obj.getString("email"),FirebaseAuth.getInstance().getCurrentUser().getUid());
                     postManClientMap.setAddress(obj.getString("address"));
                     postManClientMap.setConsignmentId(obj.getString("consignmentId"));
+
+                    //set default status to assigned when rq code is scanned
+                    ReceiverDetails details = new ReceiverDetails();
+                    details.setStatus(ConsignmentStatus.POSTMAN_ASSIGNED.toString());
+                    postManClientMap.setDetails(details);
                     uploadConsignmentDate(postManClientMap);
                     Log.d(TAG, "onActivityResult: consignment data uploaded");
 

@@ -1,6 +1,4 @@
-package com.smartpost.Entity;
-
-import java.util.List;
+package com.smartpost.entities;
 
 public class PostMan {
 
