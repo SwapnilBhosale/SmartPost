@@ -714,8 +714,8 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
 //        super.onBackPressed();
 
         super.onBackPressed();
-
-        goBackToHomeScreen();
+        overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
+        //goBackToHomeScreen();
 
        // finish();
     }

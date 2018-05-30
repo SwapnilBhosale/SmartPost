@@ -243,17 +243,10 @@ public class LoginActivity extends AppCompatActivity implements  View.OnClickLis
                 Log.d(TAG, "onClick: Invalid Enum value "+userRole.toString());
         }*/
         startActivity(userIntent);
+        overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
         finish();
     }
 
-    public boolean checkIfUserRoleSelected(){
-        if (roleGroup.getCheckedRadioButtonId() == -1){
-            lastRadioButton.setError(getResources().getString(R.string.selectRadioError));
-            lastRadioButton.requestFocus();
-            return false;
-        }
-        return true;
-    }
 
     private void updateDropDownList (){
         dropdownList.clear();

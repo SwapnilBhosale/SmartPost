@@ -98,6 +98,7 @@ public class ClientActivity extends AppCompatActivity implements LogoutService {
         intent.putExtra(Constants.ACTOR,Constants.ACTOR_CLIENT);
         intent.putExtra(Constants.CONSIG_NAME,id);
         startActivity(intent);
+        overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
     }
 
     private void initUi(){
@@ -240,6 +241,7 @@ public class ClientActivity extends AppCompatActivity implements LogoutService {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
         finish();
+        overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
     }
 
     private  void deleteFirebaseData(){

@@ -227,6 +227,7 @@ public class PostOfficeActivity extends AppCompatActivity implements LogoutServi
         }
 
         startActivity(intent);
+        overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
     }
 
     private void updatePostmanList(){
@@ -310,5 +311,6 @@ public class PostOfficeActivity extends AppCompatActivity implements LogoutServi
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
         finish();
+        overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
     }
 }

@@ -150,6 +150,7 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
         }
 
         startActivity(intent);
+        overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
     }
 
     private void dismissPD(){
@@ -372,12 +373,7 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
         finish();
-    }
-
-    private  void deleteFirebaseData(){
-        if(FirebaseAuth.getInstance().getCurrentUser()!=null) {
-            FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POSTMAN_KEY).child(FirebaseAuth.getInstance().getCurrentUser().getUid()).removeValue();
-        }
+        overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
     }
 
     @Override
