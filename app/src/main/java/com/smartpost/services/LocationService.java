@@ -98,7 +98,7 @@ public class LocationService extends Service implements LocationListener {
         this.location = location;
 
         Log.d(TAG, "onLocationChanged: Latitude " + location.getLatitude());
-        Toast.makeText(getApplicationContext(), "Location Changed in my own location", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getApplicationContext(), "Location Changed in my own location", Toast.LENGTH_SHORT).show();
 
 
         //upload location
@@ -117,7 +117,7 @@ public class LocationService extends Service implements LocationListener {
 
         Log.d(TAG, "onProviderEnabled: Latitude ");
 
-        Toast.makeText(getApplicationContext(), "location On", Toast.LENGTH_LONG).show();
+        //Toast.makeText(getApplicationContext(), "location On", Toast.LENGTH_LONG).show();
 
     }
 
@@ -125,7 +125,7 @@ public class LocationService extends Service implements LocationListener {
     public void onProviderDisabled(String s) {
 
         Log.d(TAG, "onProviderDisabled: Latitude ");
-        Toast.makeText(getApplicationContext(), "location Off", Toast.LENGTH_LONG).show();
+       Toast.makeText(getApplicationContext(), "location Off", Toast.LENGTH_LONG).show();
     }
 
 
@@ -252,7 +252,7 @@ public class LocationService extends Service implements LocationListener {
         super.onTaskRemoved(rootIntent);
 
         Log.d(TAG, "onTaskRemoved: ");
-        Toast.makeText(getApplicationContext(),"location app  Destroyed",Toast.LENGTH_LONG).show();
+        //Toast.makeText(getApplicationContext(),"location app  Destroyed",Toast.LENGTH_LONG).show();
 
        // fetchLocation();
 //        Intent intent = new Intent(getApplicationContext(),LocationService.class);
@@ -262,8 +262,9 @@ public class LocationService extends Service implements LocationListener {
 
     @Override
     public void onDestroy() {
+        locationManager.removeUpdates(this);
         super.onDestroy();
-        Log.d(TAG, "onDestroy: ");
-        Toast.makeText(getApplicationContext(),"Service Destroyed",Toast.LENGTH_LONG).show();
+       // Log.d(TAG, "onDestroy: ");
+        //Toast.makeText(getApplicationContext(),"Service Destroyed",Toast.LENGTH_LONG).show();
     }
 }

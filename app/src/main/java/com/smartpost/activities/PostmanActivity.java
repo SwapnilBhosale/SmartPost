@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -24,6 +25,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,7 +42,6 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.smartpost.entities.ConsignmentStatus;
 import com.smartpost.entities.PostManClientMap;
-import com.smartpost.LoginActivity;
 import com.smartpost.R;
 import com.smartpost.core.ApplicationSetting;
 import com.smartpost.entities.ReceiverDetails;
@@ -50,7 +51,6 @@ import com.smartpost.utils.Constants;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -116,6 +116,7 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
         qrScan = new IntentIntegrator(this);
 
         location = fetchCurrentLocation();
+        //pd.show();
     }
 
     private  void addListeners(){
@@ -126,8 +127,9 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
                 PostManClientMap p = mapList.get(i);
                 if(p.getDetails().getStatus().equalsIgnoreCase(ConsignmentStatus.DELIVERED.toString()))
                     Toast.makeText(PostmanActivity.this,"Consignment is already Delivered !",Toast.LENGTH_SHORT).show();
-                else
-                    openMapsActivity(p.getUuid(),p.getAddress(),p.getConsignmentId());
+                else {
+                    openMapsActivity(p.getUuid(), p.getAddress(), p.getConsignmentId());
+                }
             }
         });
     }
@@ -150,6 +152,13 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
         startActivity(intent);
     }
 
+    private void dismissPD(){
+        if(pd != null && pd.isShowing())
+            pd.dismiss();
+    }
+
+
+
 
     private void addPostManConsignementListener(){
        mapListener = FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POSTMAN__CONSIGNMENT_MAP);
@@ -163,6 +172,7 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
                     map.put(dataSnapshot.getKey(), p);
                     updateMapList();
                 }
+                dismissPD();
             }
 
             @Override
@@ -173,6 +183,7 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
                     map.put(dataSnapshot.getKey(), p);
                     updateMapList();
                 }
+                dismissPD();
             }
 
             @Override
@@ -183,6 +194,7 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
                     map.remove(dataSnapshot.getKey());
                     updateMapList();
                 }
+                dismissPD();
             }
 
             @Override
@@ -211,7 +223,7 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
         mapList = new ArrayList(map.values());
         Log.d(TAG, "updateMapList: Size : "+mapList.size());
         adapter.setList(mapList);
-        adapter.notifyDataSetChanged();
+        //adapter.notifyDataSetChanged();
 
     }
 
@@ -377,6 +389,7 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
     protected void onDestroy() {
         //deleteFirebaseData();
         this.stopService(serviceIntent);
+        FirebaseAuth.getInstance().signOut();
         super.onDestroy();
     }
 
@@ -585,6 +598,7 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
             @Override
             public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
                 pd.dismiss();
+                FirebaseAuth.getInstance().signOut();
                 openLoginActivity();
             }
         });
@@ -621,27 +635,32 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
         public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
             View row = convertView;
            MapHolder holder = null;
-            if (row == null) {
-                LayoutInflater inflater = ((Activity) context).getLayoutInflater();
-                row = inflater.inflate(layoutResourceId, parent, false);
-                holder = new MapHolder();
-                holder.textView1 = row.findViewById(R.id.textView1);
-                holder.textView2 = row.findViewById(R.id.textView2);
-                holder.textView3 = row.findViewById(R.id.textView3);
-                holder.textView4 = row.findViewById(R.id.textView3);
-                row.setTag(holder);
-            } else {
-                holder = (MapHolder) row.getTag();
-            }
+            LayoutInflater inflater = ((Activity) context).getLayoutInflater();
+            row = inflater.inflate(layoutResourceId, parent, false);
+            holder = new MapHolder();
+            holder.textView1 = row.findViewById(R.id.textView1);
+            holder.textView2 = row.findViewById(R.id.textView2);
+            holder.textView3 = row.findViewById(R.id.textView3);
+            holder.textView4 = row.findViewById(R.id.textView4);
+            holder.receivedByLayout = row.findViewById(R.id.receivedByLayout);
+
+            row.setTag(holder);
+
             PostManClientMap p = list.get(position);
-            Log.d(TAG, "getView: " + p.toString());
-            holder.textView1.setText("Consignement Id : " + p.getConsignmentId());
-            holder.textView2.setText("Delivery Address : " + p.getAddress());
-            holder.textView3.setText("Consignment Status : " + p.getDetails().getStatus());
+            holder.textView1.setText(p.getConsignmentId());
+            holder.textView2.setText(p.getAddress());
+            ReceiverDetails details = p.getDetails();
+            String status = details.getStatus();
+            holder.textView3.setText(status);
             if(p.getDetails().getStatus().equalsIgnoreCase(ConsignmentStatus.DELIVERED.toString())){
-                    ReceiverDetails details = p.getDetails();
-                    holder.textView4.setVisibility(View.VISIBLE);
-                    holder.textView4.setText(" Name of receiver : "+details.getName()+"\nAadhar UID : "+details.getUid()+"\nDOB : "+details.getDob());
+
+                Log.d(TAG, "getView: Set to visible");
+                    holder.receivedByLayout.setVisibility(View.VISIBLE);
+                    //holder.receivedByLayout.invalidate();
+                    holder.textView4.setText("Name : "+details.getName()+"\nAadhar UID : "+details.getUid()+"\nDOB : "+details.getDob());
+                    holder.textView3.setTextColor(Color.parseColor("#058933"));
+            }else{
+                holder.textView3.setTextColor(Color.parseColor("#eddf1c"));
             }
             return row;
         }
@@ -652,6 +671,7 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
             TextView textView2;
             TextView textView3;
             TextView textView4;
+            LinearLayout receivedByLayout;
         }
 
 

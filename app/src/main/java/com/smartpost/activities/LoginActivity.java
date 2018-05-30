@@ -1,4 +1,4 @@
-package com.smartpost;
+package com.smartpost.activities;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -24,10 +24,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.smartpost.R;
 import com.smartpost.entities.User;
-import com.smartpost.activities.ClientActivity;
-import com.smartpost.activities.PostOfficeActivity;
-import com.smartpost.activities.PostmanActivity;
 import com.smartpost.core.ApplicationSetting;
 
 import java.util.ArrayList;

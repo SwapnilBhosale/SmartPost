@@ -21,7 +21,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
-import com.smartpost.LoginActivity;
 import com.smartpost.entities.ConsignmentStatus;
 import com.smartpost.entities.PostMan;
 import com.smartpost.entities.PostManClientMap;
@@ -65,6 +64,10 @@ public class PostOfficeActivity extends AppCompatActivity implements LogoutServi
     private List<PostManClientMap> mapList = new ArrayList();
 
 
+    @Override
+    public void onBackPressed() {
+//        /super.onBackPressed();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +105,7 @@ public class PostOfficeActivity extends AppCompatActivity implements LogoutServi
                 }
             }
         });
+        //pd.show();
     }
 
     private Object getPostmanUUID(int index){
@@ -110,6 +114,11 @@ public class PostOfficeActivity extends AppCompatActivity implements LogoutServi
 
     private void updateMapList(PostManClientMap p){
         mapList.add(p);
+    }
+
+    private void dismissPD(){
+        if(pd != null && pd.isShowing())
+            pd.dismiss();
     }
 
 
@@ -158,6 +167,7 @@ public class PostOfficeActivity extends AppCompatActivity implements LogoutServi
                 Log.d(TAG, "onChildAdded: "+postman);
                 postmans.put(dataSnapshot.getKey(),postman);
                 updatePostmanList();
+                dismissPD();
 
             }
 
@@ -165,12 +175,14 @@ public class PostOfficeActivity extends AppCompatActivity implements LogoutServi
             public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 postmans.put(dataSnapshot.getKey(),dataSnapshot.getValue(PostMan.class));
                 updatePostmanList();
+                dismissPD();
             }
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
                 postmans.remove(dataSnapshot.getKey());
                 updatePostmanList();
+                dismissPD();
             }
 
             @Override
@@ -252,6 +264,7 @@ public class PostOfficeActivity extends AppCompatActivity implements LogoutServi
     protected void onDestroy() {
         postmanRefernce.removeEventListener(postmanListener);
         mapReference.removeEventListener(mapLisener);
+        FirebaseAuth.getInstance().signOut();
         super.onDestroy();
     }
 
@@ -266,16 +279,7 @@ public class PostOfficeActivity extends AppCompatActivity implements LogoutServi
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.action_logout :
-                pd.show();
-
-                //clear token
-
-                String uuId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-                DatabaseReference databaseReference =  FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POSTMAN_KEY).child(uuId);
-
-                // push hospital extension
-                databaseReference.child(Constants.FIREBASE_TOKEN).setValue("");
+                logout();
                 break;
         }
         super.onOptionsItemSelected(item);
@@ -294,6 +298,7 @@ public class PostOfficeActivity extends AppCompatActivity implements LogoutServi
         databaseReference.getRef().removeValue(new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                FirebaseAuth.getInstance().signOut();
                 pd.dismiss();
                 openLoginActivity();
             }

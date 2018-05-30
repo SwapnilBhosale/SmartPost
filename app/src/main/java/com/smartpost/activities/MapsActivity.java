@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.flags.impl.DataUtils;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -32,6 +33,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.zxing.common.StringUtils;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.smartpost.entities.ConsignmentStatus;
@@ -156,9 +158,13 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
                     Log.d(TAG, "onActivityResult: "+result.getContents());
 
                     ReceiverDetails details = parseAadharData(result.getContents());
-                    UpdateConsignmentStatus(details);
+                    if(details.getName() != null && !details.getName().isEmpty()) {
+                        UpdateConsignmentStatus(details);
+                    }else{
+                        Toast.makeText(this,"Aadhar QR scan failed",Toast.LENGTH_SHORT).show();
+                    }
                     //finsish the activity
-                    finish();
+
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -484,6 +490,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
                 if(p.isBelongToPostman(uuId) && p.getConsignmentId().equalsIgnoreCase(consignmentId)) {
                     p.setDetails(details);
                     mapListener.child(dataSnapshot.getKey()).setValue(p);
+                    finish();
                 }
             }
 
@@ -633,7 +640,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
 
 
         postmanMarker = mMap.addMarker(new MarkerOptions().position(postmanLatLng).title(data));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(postmanLatLng,14));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(postmanLatLng,16));
     }
 
     /*private void trackAmbulance(String UUID) {
@@ -678,7 +685,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         downloadTask.execute(url);
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin,
-                13));
+                14));
     }
 
     @Override

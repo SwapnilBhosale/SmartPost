@@ -8,32 +8,94 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/textView1"
-            android:layout_marginTop="30dp"
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="Consignment Id : " />
-        <TextView
-            android:id="@+id/textView2"
-            android:paddingTop="5dp"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="Delivery Address : "/>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#420717"
+                android:textSize="@dimen/sample_text_size"
+                android:text="Consignment Id     :  "/>
 
-        <TextView
-            android:id="@+id/textView3"
-            android:paddingTop="5dp"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="Status : "/>
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textSize="@dimen/sample_text_size"/>
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/textView4"
-            android:paddingTop="5dp"
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text=""/>
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Delivery Address   :  "
+                android:textColor="#420717"
+                android:textSize="@dimen/sample_text_size" />
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textSize="@dimen/sample_text_size" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/statusLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Status                      :  "
+                android:textColor="#420717"
+                android:textSize="@dimen/sample_text_size" />
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/sample_text_size"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/receivedByLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:visibility="gone"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Receiver  details    :  "
+                android:textColor="#420717"
+                android:textSize="@dimen/sample_text_size" />
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""/>
+
+        </LinearLayout>
+
+
+
 
 
     </LinearLayout>

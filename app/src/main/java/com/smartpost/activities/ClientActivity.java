@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -18,8 +19,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -30,14 +33,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.smartpost.entities.ConsignmentStatus;
 import com.smartpost.entities.PostManClientMap;
-import com.smartpost.LoginActivity;
 import com.smartpost.R;
 import com.smartpost.core.ApplicationSetting;
 import com.smartpost.entities.ReceiverDetails;
 import com.smartpost.services.LogoutService;
 import com.smartpost.utils.Constants;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,6 +72,7 @@ public class ClientActivity extends AppCompatActivity implements LogoutService {
         adapter = new CustomListAdapter(this,R.layout.list_item,mapList);
         listView.setAdapter(adapter);
         addListeners();
+        //pd.show();
         //Toast.makeText(this,"In Client Activity",Toast.LENGTH_SHORT).show();
     }
 
@@ -82,7 +83,10 @@ public class ClientActivity extends AppCompatActivity implements LogoutService {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 PostManClientMap p = mapList.get(i);
                 //got uuid of postman//
-                openMapsActivity(p.getUuid(),p.getAddress(),p.getConsignmentId());
+                if(!p.getDetails().getStatus().equalsIgnoreCase(ConsignmentStatus.DELIVERED.toString()))
+                    openMapsActivity(p.getUuid(),p.getAddress(),p.getConsignmentId());
+                else
+                    Toast.makeText(ClientActivity.this,"Can not track already delivered consignment !",Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -120,6 +124,11 @@ public class ClientActivity extends AppCompatActivity implements LogoutService {
         return super.onCreateView(name, context, attrs);
     }
 
+    private void dismissPD(){
+        if(pd != null && pd.isShowing())
+            pd.dismiss();
+    }
+
     private void addConsignmentListener(){
         mapListener = FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POSTMAN__CONSIGNMENT_MAP);
         eventListener = mapListener.addChildEventListener(new ChildEventListener() {
@@ -132,6 +141,7 @@ public class ClientActivity extends AppCompatActivity implements LogoutService {
                     map.put(dataSnapshot.getKey(),p);
                     updateMapList();
                 }
+                dismissPD();
             }
 
             @Override
@@ -141,6 +151,7 @@ public class ClientActivity extends AppCompatActivity implements LogoutService {
                     map.put(dataSnapshot.getKey(),p);
                     updateMapList();
                 }
+                dismissPD();
             }
 
             @Override
@@ -150,6 +161,7 @@ public class ClientActivity extends AppCompatActivity implements LogoutService {
                     map.remove(dataSnapshot.getKey());
                     updateMapList();
                 }
+                dismissPD();
             }
 
             @Override
@@ -163,6 +175,11 @@ public class ClientActivity extends AppCompatActivity implements LogoutService {
             }
         });
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        //super.onBackPressed();
     }
 
     @Override
@@ -194,8 +211,6 @@ public class ClientActivity extends AppCompatActivity implements LogoutService {
 
         // push token
         databaseReference.child(Constants.FIREBASE_TOKEN).setValue(FirebaseInstanceId.getInstance().getToken());
-        databaseReference.child(Constants.FIREBASE_LAT).setValue(0.0);
-        databaseReference.child(Constants.FIREBASE_LONG).setValue(0.0);
         databaseReference.child(Constants.FIREBASE_EMAIL).setValue(ApplicationSetting.getInstance().getUserEmail());
 
 
@@ -246,6 +261,7 @@ public class ClientActivity extends AppCompatActivity implements LogoutService {
             @Override
             public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
                 pd.dismiss();
+                FirebaseAuth.getInstance().signOut();
                 openLoginActivity();
             }
         });
@@ -284,26 +300,32 @@ public class ClientActivity extends AppCompatActivity implements LogoutService {
         public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
             View row = convertView;
             MapHolder holder = null;
-            if(row == null){
-                LayoutInflater inflater = ((Activity)context).getLayoutInflater();
-                row  = inflater.inflate(layoutResourceId,parent,false);
-                holder = new MapHolder();
-                holder.textView1 = row.findViewById(R.id.textView1);
-                holder.textView2 = row.findViewById(R.id.textView2);
-                holder.textView3 = row.findViewById(R.id.textView3);
-                holder.textView4 = row.findViewById(R.id.textView4);
-                row.setTag(holder);
-            }else{
-                holder = (MapHolder)row.getTag();
-            }
+            LayoutInflater inflater = ((Activity)context).getLayoutInflater();
+            row  = inflater.inflate(layoutResourceId,parent,false);
+            holder = new MapHolder();
+            holder.textView1 = row.findViewById(R.id.textView1);
+            holder.textView2 = row.findViewById(R.id.textView2);
+            holder.textView3 = row.findViewById(R.id.textView3);
+            holder.textView4 = row.findViewById(R.id.textView4);
+            holder.receivedByLayout = row.findViewById(R.id.receivedByLayout);
+            row.setTag(holder);
+
+
             PostManClientMap p = list.get(position);
             Log.d(TAG, "getView: "+p.toString());
-            holder.textView1.setText("Consignement Id : "+p.getConsignmentId());
-            holder.textView2.setText("Delivery Address : "+p.getAddress());
-            holder.textView3.setText("Status : "+p.getDetails().getStatus());
+            holder.textView1.setText(p.getConsignmentId());
+            holder.textView2.setText(p.getAddress());
+            String status = p.getDetails().getStatus();
+            holder.textView3.setText(status);
+
             ReceiverDetails d = p.getDetails();
-            if(p.getDetails().getStatus().equalsIgnoreCase(ConsignmentStatus.DELIVERED.toString()))
-                holder.textView4.setText("Received by : "+d.getName());
+            if(status.equalsIgnoreCase(ConsignmentStatus.DELIVERED.toString())) {
+                holder.receivedByLayout.setVisibility(View.VISIBLE);
+                holder.textView4.setText(d.getName());
+                holder.textView3.setTextColor(Color.parseColor("#058933"));
+            }else{
+                holder.textView3.setTextColor(Color.parseColor("#eddf1c"));
+            }
            return row;
         }
 
@@ -313,6 +335,7 @@ public class ClientActivity extends AppCompatActivity implements LogoutService {
             TextView textView2;
             TextView textView3;
             TextView textView4;
+            LinearLayout receivedByLayout;
         }
 
 
@@ -328,6 +351,7 @@ public class ClientActivity extends AppCompatActivity implements LogoutService {
     @Override
     protected void onDestroy() {
         //deleteFirebaseData();
+        FirebaseAuth.getInstance().signOut();
         super.onDestroy();
 
     }

@@ -50,8 +50,8 @@
    <ListView
        android:id="@+id/listViewPostman"
        android:layout_width="match_parent"
-       android:divider="#f0f0f0"
-       android:dividerHeight="7dp"
+       android:divider="@color/button_disabled_background"
+       android:dividerHeight="10dp"
        android:layout_height="wrap_content"/>
 
 </LinearLayout>

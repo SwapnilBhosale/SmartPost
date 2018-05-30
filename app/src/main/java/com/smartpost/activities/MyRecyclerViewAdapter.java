@@ -35,7 +35,6 @@ public class MyRecyclerViewAdapter extends RecyclerView
         TextView postmanDetail;
         TextView postmanLatLng;
         TextView currLocation;
-        TextView consignmentDetails;
        // TextView diagnosis;
 
         public DataObjectHolder(View itemView) {
@@ -87,8 +86,8 @@ public class MyRecyclerViewAdapter extends RecyclerView
 
         PostMan postman = mDataset.get(position);
         holder.postmanDetail.setText(postman.getEmail());
-        holder.postmanLatLng.setText("Lat : "+postman.getLatitude()+" Long : "+postman.getLongitude());
-        holder.currLocation.setText("Curr Loc : "+reverseGeoCode(postman.getLatitude(),postman.getLongitude()));
+        holder.postmanLatLng.setText(String.valueOf(postman.getLatitude()).concat(" : ").concat(String.valueOf(postman.getLongitude())));
+        holder.currLocation.setText(reverseGeoCode(postman.getLatitude(),postman.getLongitude()));
     }
 
     public void addItem(PostMan dataObj, int index) {
@@ -127,11 +126,14 @@ public class MyRecyclerViewAdapter extends RecyclerView
                 Address address = addresses.get(0);
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
-                    sb.append(address.getAddressLine(i)).append("\n");
+                    sb.append(address.getAddressLine(i)).append(", ");
                 }
-                sb.append(address.getLocality()).append("\n");
+                sb.append(address.getLocality()).append(",");
+                sb.append(address.getAdminArea()).append(", ");
+                sb.append(address.getPostalCode()).append(" ");
                 // sb.append(address.getPostalCode()).append("\n");
                 sb.append(address.getCountryName());
+
                 result = sb.toString();
                 Log.d(TAG, "reverseGeoCode: "+result);
             }
