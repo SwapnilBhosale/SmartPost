@@ -20,4 +20,11 @@
             android:dividerHeight="7dp"
             android:layout_height="wrap_content"/>
     </LinearLayout>
+    <TextView
+        android:id="@+id/empty_list_item_client"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:visibility="gone"
+        android:gravity="center_vertical|center_horizontal"
+        android:text="@string/emptyList"/>
 </LinearLayout>

@@ -69,6 +69,7 @@ public class ClientActivity extends AppCompatActivity implements LogoutService {
         initUi();
         initSpinnerDialogue();
 
+        listView.setEmptyView(findViewById(R.id.empty_list_item_client));
         adapter = new CustomListAdapter(this,R.layout.list_item,mapList);
         listView.setAdapter(adapter);
         addListeners();

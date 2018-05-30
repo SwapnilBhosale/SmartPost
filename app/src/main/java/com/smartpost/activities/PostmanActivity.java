@@ -109,6 +109,7 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
 
         //endJourney.setEnabled(false);
 
+        listViewPostman.setEmptyView(findViewById(R.id.empty_list_item_postman));
         adapter = new CustomListAdapter(this,R.layout.list_item,mapList);
         listViewPostman.setAdapter(adapter);
         addListeners();

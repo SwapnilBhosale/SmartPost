@@ -17,4 +17,12 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />-->
 
+    <TextView
+        android:id="@+id/empty_list_item_postoffice"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:visibility="gone"
+        android:gravity="center_vertical|center_horizontal"
+        android:text="@string/emptyList"/>
+
 </RelativeLayout>
