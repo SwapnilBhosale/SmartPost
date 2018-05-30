@@ -12,6 +12,16 @@
         android:orientation="vertical"
         android:id="@+id/loginActivity">
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="30dp"
+            android:paddingBottom="20dp"
+            android:textColor="#000000"
+            android:textSize="@dimen/sample_text_size"
+            android:layout_marginLeft="10dp"
+            android:textStyle="bold"
+            android:text="Select the role  "/>
 
         <RadioGroup
             android:id="@+id/role_layout"
@@ -21,18 +31,24 @@
             <RadioButton
                 android:id="@+id/client"
                 android:checked="true"
+                android:paddingTop="15dp"
+                android:paddingBottom="15dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Client" />
+                android:text="Client"  />
 
             <RadioButton
                 android:id="@+id/postman"
+                android:paddingTop="15dp"
+                android:paddingBottom="15dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Postman" />
 
             <RadioButton
                 android:id="@+id/postOffice"
+                android:paddingTop="15dp"
+                android:paddingBottom="15dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Post Office" />

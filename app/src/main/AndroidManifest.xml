@@ -28,24 +28,28 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".activities.LoginActivity"
-            android:label="@string/app_name">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            android:label="Login">
         </activity>
-        <activity android:name=".activities.ClientActivity" />
-        <activity android:name=".activities.PostmanActivity" />
-        <activity android:name=".activities.PostOfficeActivity"></activity>
+        <activity android:name=".activities.ClientActivity"
+            android:label="Client Home"/>
+        <activity android:name=".activities.PostmanActivity" android:label="Postman Home"/>
+        <activity android:name=".activities.PostOfficeActivity" android:label="Post-Office Home"/>
         <activity
             android:name=".activities.MapsActivity"
-            android:label="MapsActivity"></activity>
+            android:label="RealTime Tracking" />
 
-        <service android:name=".services.LocationService"/>
+        <service android:name=".services.LocationService" />
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDPFsbr5IOfBz-3oPAwh50LMfov7tNd6ws" />
+
+        <activity android:name=".activities.SplashActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
