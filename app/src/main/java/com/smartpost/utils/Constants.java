@@ -31,4 +31,7 @@ public class Constants {
     public static final String CONSIG_STATUS = "consigStatus";
     public static final String CONSIG_RECEIVER_NAME = "consigRecName";
 
+    public static final String FIREBASE_NOTFN_ACTION = "firebaseNotAction";
+    public static final String FIREBASE_ACTION_CONSG_ASSIGNED = "consgAssigned";
+
 }

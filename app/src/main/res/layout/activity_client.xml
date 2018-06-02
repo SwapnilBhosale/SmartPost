@@ -26,5 +26,5 @@
         android:layout_height="fill_parent"
         android:visibility="gone"
         android:gravity="center_vertical|center_horizontal"
-        android:text="@string/emptyList"/>
+        android:text="No consignments for you  !"/>
 </LinearLayout>

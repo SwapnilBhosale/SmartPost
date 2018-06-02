@@ -40,15 +40,19 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.smartpost.core.SmartPostApplication;
+import com.smartpost.entities.Client;
 import com.smartpost.entities.ConsignmentStatus;
 import com.smartpost.entities.PostManClientMap;
 import com.smartpost.R;
 import com.smartpost.core.ApplicationSetting;
+import com.smartpost.entities.PostOffice;
 import com.smartpost.entities.ReceiverDetails;
 import com.smartpost.services.LocationService;
 import com.smartpost.services.LogoutService;
 import com.smartpost.utils.Constants;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -216,6 +220,8 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
     protected void onPause() {
         super.onPause();
         mapListener.removeEventListener(eventListener);
+        //clientReference.removeEventListener(clientListener);
+        //postOfficeReference.removeEventListener(postOfficeListener);
 
     }
 
@@ -398,6 +404,8 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
         this.startService(serviceIntent);
         uploadDataToServer();
         addPostManConsignementListener();
+       // addClientListener();
+        //addPostOfficeListener();
     }
 
 
@@ -516,6 +524,7 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
                     uploadConsignmentDate(postManClientMap);
                     Log.d(TAG, "onActivityResult: consignment data uploaded");
 
+                    //sendCloudPush(postManClientMap.getEmailId());
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -529,6 +538,38 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    private void sendCloudPush(String email) throws JSONException{
+        JSONObject parahJson = new JSONObject();
+        JSONObject dataObject = new JSONObject();
+        JSONArray tokenJsonArray = new JSONArray();
+
+        String token = null;
+        for (Map.Entry<String, Client> entry : clientMap.entrySet()) {
+            Client client = entry.getValue();
+            if(client.getEmail().equalsIgnoreCase(email)){
+                token = client.getToken();
+            }
+        }
+        if(token == null)
+            return;
+        tokenJsonArray.put(token);
+        dataObject.put(Constants.FIREBASE_NOTFN_ACTION, Constants.FIREBASE_ACTION_CONSG_ASSIGNED);
+
+        JSONObject notificationJsonObject = new JSONObject();
+        notificationJsonObject.put("title","Help Me");
+        notificationJsonObject.put("body","Help Me");
+
+        notificationJsonObject.put("sound", "default");
+
+        parahJson.put("notification", notificationJsonObject);
+        parahJson.put("data", dataObject);
+        parahJson.put("registration_ids", tokenJsonArray);
+
+        ((SmartPostApplication)getApplication()).sendCloudNotification(parahJson);
+
+
     }
 
     @Override
@@ -601,6 +642,78 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
         });
     }
 
+    private DatabaseReference clientReference;
+    private ChildEventListener clientListener;
+
+    private Map<String,Client> clientMap = new HashMap<>();
+
+    private void addClientListener(){
+        clientReference = FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_CLIENT_KEY);
+        clientListener =  clientReference.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                clientMap.put(dataSnapshot.getKey(),dataSnapshot.getValue(Client.class));
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                clientMap.put(dataSnapshot.getKey(),dataSnapshot.getValue(Client.class));
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                clientMap.remove(dataSnapshot.getKey());
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+
+    private DatabaseReference postOfficeReference;
+    private ChildEventListener postOfficeListener;
+
+    private Map<String,PostOffice> postOfficeMap = new HashMap<>();
+
+    private void addPostOfficeListener(){
+        postOfficeReference = FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_POST_OFFICE_KEY);
+        postOfficeListener =  postOfficeReference.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                postOfficeMap.put(dataSnapshot.getKey(),dataSnapshot.getValue(PostOffice.class));
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                postOfficeMap.put(dataSnapshot.getKey(),dataSnapshot.getValue(PostOffice.class));
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                postOfficeMap.remove(dataSnapshot.getKey());
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
     public class CustomListAdapter extends ArrayAdapter<PostManClientMap> {
 
         @Override

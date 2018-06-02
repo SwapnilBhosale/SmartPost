@@ -1,10 +1,24 @@
 package com.smartpost.entities;
 
-public class Client extends User {
+public class Client{
 
+    private String email;
 
-    @Override
-    public void openPostLoginActivity() {
+    private String token;
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }
