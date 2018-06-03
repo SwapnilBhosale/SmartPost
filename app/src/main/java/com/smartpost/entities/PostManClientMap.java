@@ -6,6 +6,7 @@ public class PostManClientMap {
     private String uuid;
     private String address;
     private String consignmentId;
+    private String phone;
 
     private ReceiverDetails details;
 
@@ -79,5 +80,13 @@ public class PostManClientMap {
 
     public void setDetails(ReceiverDetails details) {
         this.details = details;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 }

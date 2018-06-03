@@ -34,4 +34,6 @@ public class Constants {
     public static final String FIREBASE_NOTFN_ACTION = "firebaseNotAction";
     public static final String FIREBASE_ACTION_CONSG_ASSIGNED = "consgAssigned";
 
+    public static final String POSTMAN_PHONE = "phone";
+
 }

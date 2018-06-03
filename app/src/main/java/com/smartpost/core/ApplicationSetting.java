@@ -17,6 +17,8 @@ public class ApplicationSetting {
 
     // Keys
     private final static String KEY_USER_EMAIL_ID = "KEY_USER_EMAIL_ID";
+    private final static String KEY_PHONE = "KEY_PHONE";
+
 
 
     private ApplicationSetting() {
@@ -40,6 +42,17 @@ public class ApplicationSetting {
         String emailId = sharedPreferences.getString(KEY_USER_EMAIL_ID, "");
         Log.d(TAG, "getUserEmail: "+emailId);
         return emailId;
+    }
+
+    public void setPhone(String phone) {
+        editor.putString(KEY_PHONE, phone);
+        editor.commit();
+    }
+
+    public String getPhone() {
+        String phone = sharedPreferences.getString(KEY_PHONE, "");
+        Log.d(TAG, "getUserEmail: "+phone);
+        return phone;
     }
 
 

@@ -435,6 +435,7 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
         //databaseReference.child(Constants.FIREBASE_LAT).setValue(0.0);
         //databaseReference.child(Constants.FIREBASE_LONG).setValue(0.0);
         databaseReference.child(Constants.FIREBASE_EMAIL).setValue(ApplicationSetting.getInstance().getUserEmail());
+        databaseReference.child(Constants.POSTMAN_PHONE).setValue(ApplicationSetting.getInstance().getPhone());
         /*databaseReference.child(Constant.FIREBASE_ACTOR_DATA).setValue(ambulance.getUserData());
         databaseReference.child(Constant.FIREBASE_AMBULANCE_STATUS).setValue(Constant.Ambulance_Status.Free.toString());
         databaseReference.child(Constant.FIREBASE_UUID).setValue(FirebaseAuth.getInstance().getCurrentUser().getUid());
@@ -475,7 +476,7 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
 
     private void removeOldAssignmentIfAssigned(String id){
 
-        Log.d(TAG, "removeOldAssignmentIfAssigned: id "+id);
+        Log.d(TAG, "removeOldAssignmentIfAssigned: id "+id + " size : "+allMap.size());
 
         for (final Map.Entry<String, PostManClientMap> entry : allMap.entrySet()) {
             PostManClientMap p = entry.getValue();

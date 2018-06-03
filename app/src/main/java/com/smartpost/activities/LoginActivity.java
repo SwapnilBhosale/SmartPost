@@ -56,7 +56,11 @@ public class LoginActivity extends AppCompatActivity implements  View.OnClickLis
     List<String> clientList = new ArrayList();
     List<String> postmanList = new ArrayList();
     List<String> postOffList = new ArrayList<>();
+
+    List<String> phoneList = new ArrayList<>();
     ArrayAdapter<String> dataAdapter;
+
+    private String phone;
 
 
 
@@ -102,10 +106,19 @@ public class LoginActivity extends AppCompatActivity implements  View.OnClickLis
         clientList.add("smartpost_client_3@gmail.com");
         clientList.add("smartpost_client_4@gmail.com");
 
+
+
+
         postmanList.add("smartpost_postman_1@gmail.com");
         postmanList.add("smartpost_postman_2@gmail.com");
         postmanList.add("smartpost_postman_3@gmail.com");
         postmanList.add("smartpost_postman_4@gmail.com");
+
+        phoneList.add("9822113301");
+        phoneList.add("9822113302");
+        phoneList.add("9822113303");
+        phoneList.add("9822113304");
+
 
         postOffList.add("smartpost_postoffice@gmail.com");
 
@@ -146,6 +159,7 @@ public class LoginActivity extends AppCompatActivity implements  View.OnClickLis
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 emailId = parent.getItemAtPosition(position).toString();
+                phone = phoneList.get(0);
             }
 
             @Override
@@ -163,6 +177,7 @@ public class LoginActivity extends AppCompatActivity implements  View.OnClickLis
                 Log.d(TAG, "onClick: emailId : "+emailId+" userEole:"+userRole);
                 Toast.makeText(this,"UserRole : "+userRole+" emailId : "+emailId,Toast.LENGTH_SHORT).show();
                 ApplicationSetting.getInstance().setUserEmail(emailId);
+                ApplicationSetting.getInstance().setPhone(phone);
                 signInWithFirebase();
              break;
              default:
@@ -262,6 +277,7 @@ public class LoginActivity extends AppCompatActivity implements  View.OnClickLis
                 break;
         }
         emailId = dropdownList.get(0);
+        phone = phoneList.get(0);
         dataAdapter.notifyDataSetChanged();
     }
     @Override

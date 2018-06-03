@@ -9,6 +9,8 @@ public class PostMan {
 
     private String email;
 
+    private String phone;
+
     public String getEmail() {
         return email;
     }
@@ -51,5 +53,13 @@ public class PostMan {
 
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 }

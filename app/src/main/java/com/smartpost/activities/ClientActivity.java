@@ -85,19 +85,20 @@ public class ClientActivity extends AppCompatActivity implements LogoutService {
                 PostManClientMap p = mapList.get(i);
                 //got uuid of postman//
                 if(!p.getDetails().getStatus().equalsIgnoreCase(ConsignmentStatus.DELIVERED.toString()))
-                    openMapsActivity(p.getUuid(),p.getAddress(),p.getConsignmentId());
+                    openMapsActivity(p.getUuid(),p.getAddress(),p.getConsignmentId(),p.getPhone());
                 else
                     Toast.makeText(ClientActivity.this,"Can not track already delivered consignment !",Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void openMapsActivity(String uuid,String address,String id){
+    private void openMapsActivity(String uuid,String address,String id,String phone){
         Intent intent = new Intent(this,MapsActivity.class);
         intent.putExtra(Constants.FIREBASE_UUID,uuid);
         intent.putExtra(Constants.FIREBASE_ADDRSS,address);
         intent.putExtra(Constants.ACTOR,Constants.ACTOR_CLIENT);
         intent.putExtra(Constants.CONSIG_NAME,id);
+        intent.putExtra(Constants.POSTMAN_PHONE,phone);
         startActivity(intent);
         overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
     }

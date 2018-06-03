@@ -370,7 +370,8 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
                 do {
                     String address = intent.getStringExtra(Constants.FIREBASE_ADDRSS.concat("_"+count));
                     String details = intent.getStringExtra(Constants.CONSIG_DETAILS.concat("_"+count));
-                    addConsignmentMarkerPostOffice(address, details);
+                    if(address!=null && details!=null)
+                        addConsignmentMarkerPostOffice(address, details);
                     count--;
                 }while(count >0);
                 fetchPostmanDetail(postmanUUID);
@@ -457,6 +458,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
                 String postmanUUID = intent.getStringExtra(Constants.FIREBASE_UUID);
                 String address = intent.getStringExtra(Constants.FIREBASE_ADDRSS);
                 String id = intent.getStringExtra(Constants.CONSIG_NAME);
+                String phone = intent.getStringExtra(Constants.POSTMAN_PHONE);
                 Log.d(TAG, "checkIntent: postmanUUID : "+postmanUUID);
                 addConsignmentMarker(address,id);
                 fetchPostmanDetail(postmanUUID);
@@ -561,7 +563,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
                 PostMan p = dataSnapshot.getValue(PostMan.class);
                 Log.d(TAG, "onDataChange: PostMan Data : "+p.toString());
                 postManLatLng = new LatLng(p.getLatitude(),p.getLongitude());
-                trackPostman(p.getLatitude(),p.getLongitude(),p.getEmail());
+                trackPostman(p.getLatitude(),p.getLongitude(),p.getEmail().concat(", Phone : ").concat(p.getPhone()));
                 if(!Actor.equalsIgnoreCase(Constants.ACTOR_POSTOFFICE))
                     drawPathFromOriginToDestination(postManLatLng,consignmentLatLng);
 
