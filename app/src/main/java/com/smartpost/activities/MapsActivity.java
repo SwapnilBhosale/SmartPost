@@ -13,6 +13,7 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -110,6 +111,12 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
     private String postmanUUID;
 
 
+    private Button addressNotFound;
+    private Button clientNotPresent;
+
+    private RelativeLayout postmanActions;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,6 +126,10 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
         ambulanceBtn = (Button) findViewById(R.id.ambulance_btn);
         conferenceCallBtn = (Button) findViewById(R.id.btn_conference_hosp);
         endJourneyBtn = (Button) findViewById(R.id.btn_end_journey);
+
+        clientNotPresent = findViewById(R.id.clientNotPresent);
+        addressNotFound = findViewById(R.id.addressNotFound);
+        postmanActions = findViewById(R.id.postmanActions);
 
 
         addGoogleMap();
@@ -283,7 +294,8 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
 
                //bottomText.setVisibility(View.VISIBLE);
                //bottomText.setText("Waiting For Ambulance");
-               endJourneyBtn.setVisibility(View.VISIBLE);
+
+                postmanActions.setVisibility(View.VISIBLE);
                endJourneyBtn.setOnClickListener(new View.OnClickListener() {
                    @Override
                    public void onClick(View view) {
@@ -291,6 +303,26 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMarker
                        qrScan.initiateScan();
                    }
                });
+
+               addressNotFound.setOnClickListener(new View.OnClickListener() {
+                   @Override
+                   public void onClick(View view) {
+                       ReceiverDetails details = new ReceiverDetails();
+                       details.setStatus(ConsignmentStatus.ADDRESS_NOT_FOUND.toString());
+                       UpdateConsignmentStatus(details);
+                   }
+               });
+
+               clientNotPresent.setOnClickListener(new View.OnClickListener() {
+                   @Override
+                   public void onClick(View view) {
+                       ReceiverDetails details = new ReceiverDetails();
+                       details.setStatus(ConsignmentStatus.CLIENT_NOT_AVAILABLE_TO_PICKUP.toString());
+                       UpdateConsignmentStatus(details);
+                   }
+               });
+
+
 
               /* patientUUID=intent.getStringExtra(Constant.FIREBASE_UUID);
                System.out.println("UUID"+patientUUID);

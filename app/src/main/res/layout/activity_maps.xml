@@ -50,16 +50,40 @@
         android:text="Conference Call"
         android:visibility="gone" />
 
-    <Button
-        android:visibility="gone"
-        android:id="@+id/btn_end_journey"
+    <RelativeLayout
+        android:id="@+id/postmanActions"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="39dp"
-        android:text="Delivery"
-        android:layout_alignParentBottom="true"
-        android:layout_toEndOf="@+id/maps_bottom_text"
-        android:layout_toRightOf="@+id/maps_bottom_text"/>
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:visibility="gone">
+        <Button
+
+            android:id="@+id/btn_end_journey"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="11dp"
+            android:text="Delivery"
+            android:layout_marginLeft="10dp"
+            android:layout_alignParentBottom="true"/>
+        <Button
+            android:id="@+id/addressNotFound"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Address not found"
+            android:textSize="11dp"
+            android:layout_alignParentBottom="true"
+            android:layout_toEndOf="@+id/btn_end_journey"
+            android:layout_toRightOf="@+id/btn_end_journey"/>
+        <Button
+            android:id="@+id/clientNotPresent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="11dp"
+            android:text="Client not present"
+            android:layout_alignParentBottom="true"
+            android:layout_toEndOf="@+id/addressNotFound"
+            android:layout_toRightOf="@+id/addressNotFound"/>
+    </RelativeLayout>
 </RelativeLayout>
 
 

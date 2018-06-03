@@ -54,7 +54,7 @@ public class LocationService extends Service implements LocationListener {
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 0; // 10 meters
 
     // The minimum time between updates in milliseconds
-    private static final long MIN_TIME_BW_UPDATES = 2000; // 1 minute
+    private static final long MIN_TIME_BW_UPDATES = 0; // 1 minute
 
     // Declaring a Location Manager
     protected LocationManager locationManager;
@@ -98,7 +98,7 @@ public class LocationService extends Service implements LocationListener {
         this.location = location;
 
         Log.d(TAG, "onLocationChanged: Latitude " + location.getLatitude());
-        //Toast.makeText(getApplicationContext(), "Location Changed in my own location", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), "Location Changed in my own location", Toast.LENGTH_SHORT).show();
 
 
         //upload location

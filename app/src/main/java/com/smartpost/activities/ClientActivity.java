@@ -326,8 +326,10 @@ public class ClientActivity extends AppCompatActivity implements LogoutService {
                 holder.receivedByLayout.setVisibility(View.VISIBLE);
                 holder.textView4.setText(d.getName());
                 holder.textView3.setTextColor(Color.parseColor("#058933"));
-            }else{
+            }else if(status.equalsIgnoreCase(ConsignmentStatus.POSTMAN_ASSIGNED.toString())){
                 holder.textView3.setTextColor(Color.parseColor("#eddf1c"));
+            }else{
+                holder.textView3.setTextColor(Color.parseColor("#ce0a31"));
             }
            return row;
         }

@@ -432,8 +432,8 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
         databaseReference.child(Constants.FIREBASE_TOKEN).setValue(FirebaseInstanceId.getInstance().getToken());
 
         //push lat long
-        databaseReference.child(Constants.FIREBASE_LAT).setValue(0.0);
-        databaseReference.child(Constants.FIREBASE_LONG).setValue(0.0);
+        //databaseReference.child(Constants.FIREBASE_LAT).setValue(0.0);
+        //databaseReference.child(Constants.FIREBASE_LONG).setValue(0.0);
         databaseReference.child(Constants.FIREBASE_EMAIL).setValue(ApplicationSetting.getInstance().getUserEmail());
         /*databaseReference.child(Constant.FIREBASE_ACTOR_DATA).setValue(ambulance.getUserData());
         databaseReference.child(Constant.FIREBASE_AMBULANCE_STATUS).setValue(Constant.Ambulance_Status.Free.toString());
@@ -762,15 +762,18 @@ public class PostmanActivity extends AppCompatActivity implements LocationListen
             ReceiverDetails details = p.getDetails();
             String status = details.getStatus();
             holder.textView3.setText(status);
-            if(p.getDetails().getStatus().equalsIgnoreCase(ConsignmentStatus.DELIVERED.toString())){
+            String s = p.getDetails().getStatus();
+            if(s.equalsIgnoreCase(ConsignmentStatus.DELIVERED.toString())){
 
                 Log.d(TAG, "getView: Set to visible");
                     holder.receivedByLayout.setVisibility(View.VISIBLE);
                     //holder.receivedByLayout.invalidate();
                     holder.textView4.setText("Name : "+details.getName()+"\nAadhar UID : "+details.getUid()+"\nDOB : "+details.getDob());
                     holder.textView3.setTextColor(Color.parseColor("#058933"));
-            }else{
+            }else if(s.equalsIgnoreCase(ConsignmentStatus.POSTMAN_ASSIGNED.toString())){
                 holder.textView3.setTextColor(Color.parseColor("#eddf1c"));
+            }else{
+                holder.textView3.setTextColor(Color.parseColor("#ce0a31"));
             }
             return row;
         }
